@@ -1,0 +1,79 @@
+package core.utils {
+	import flash.utils.getQualifiedClassName;
+	import flash.utils.describeType;
+	import flash.display.BitmapData;
+	import flash.utils.getDefinitionByName;
+	import flash.display.DisplayObject;
+
+	/**
+	 * @author anthonysapp
+	 */
+	public class ClassUtil {
+		public static function getBitmapDataByName(value : String, width : Number = 0, height : Number = 0) : BitmapData {
+			var C : Class = getDefinitionByName(value) as Class;
+			return new C(width, height);
+		}
+
+		public static function getClassByName(value : String, ...args) : Object {
+			var C : Class = getDefinitionByName(value) as Class;
+			return new C();
+		}
+
+		public static function newSibling(sourceObj : Object) : * {
+			if(sourceObj) {
+				var objSibling : *;
+				try {
+					var classOfSourceObj : Class = getDefinitionByName(getQualifiedClassName(sourceObj)) as Class;
+					objSibling = new classOfSourceObj();
+				}
+ 
+             catch(e : Object) {
+				}
+				return objSibling;
+			}
+			return null;
+		}
+		
+		public static function clone(source : Object) : Object {
+ 
+			var clone : Object;
+			if(source) {
+				clone = newSibling(source);
+				if(clone) {
+					copyData(source, clone);
+				}
+			}
+			return clone;
+		}
+
+		public static function copyData(source : Object, destination : Object) : void {
+ 
+			//copies data from commonly named properties and getter/setter pairs
+			if((source) && (destination)) {
+ 
+				try {
+					var sourceInfo : XML = describeType(source);
+					var prop : XML;
+ 
+					for each(prop in sourceInfo.variable) {
+ 
+						if(destination.hasOwnProperty(prop.@name)) {
+							destination[prop.@name] = source[prop.@name];
+						}
+					}
+ 
+					for each(prop in sourceInfo.accessor) {
+						if(prop.@access == "readwrite") {
+							if(destination.hasOwnProperty(prop.@name)) {
+								destination[prop.@name] = source[prop.@name];
+							}
+						}
+					}
+				}
+             catch (err : Object) {
+					;
+				}
+			}
+		}
+	}
+}
